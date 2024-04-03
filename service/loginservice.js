@@ -5,7 +5,7 @@ const Otp = require('../model/otp')
 
 const register = async (req, res) => {
     try {
-        const { name, email, password, username, phonenumber, role, specialization, pastexperiences } = req.body;
+        const { name, email, username, password} = req.body;
 
         let existingUser = await User.findOne({ username });
 
@@ -21,7 +21,7 @@ const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
 
-        const newUser = new User({ name, email, password: hashedPassword, phonenumber, username, role, specialization, pastexperiences });
+        const newUser = new User({ name, email, password: hashedPassword, username});
 
         await newUser.save();
 
@@ -34,9 +34,9 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { email, password } = req.body;
 
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ email });
 
         if (!user) {
             return res.status(404).json({ error: "User not found" });
