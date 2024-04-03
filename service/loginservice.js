@@ -101,7 +101,7 @@ const validateOtp = async (req, res) => {
         const generatedOtpModel = await Otp.findOne({ email: req.body.email });
 
         if (!generatedOtpModel) {
-            return res.status(404).json({ error: "Regenerate OTP" });
+            return res.status(405).json({ error: "Regenerate OTP" });
         }
 
         if (parseInt(req.body.otp) !== generatedOtpModel.otp) {
@@ -114,6 +114,25 @@ const validateOtp = async (req, res) => {
         return res.status(500).json({ error: 'Failed to validate OTP. Please try again later.' });
     }
 };
+
+const isAvailable = async (req, res) => {
+    try {
+        const e_user = await User.findOne({ email: req.body.email });
+        const u_user = await User.findOne({ username: req.body.username });
+        if (e_user && u_user) {
+            return res.status(405).json({ error: "Email and Username already exists" })
+        }
+        if (e_user) {
+            return res.status(405).json({ error: "Email already exists" })
+        }
+        if (u_user) {
+            return res.status(405).json({ error: "Username already exists" })
+        }
+        return res.status(200).json({ message: 'Available' })
+    } catch (e) {
+        return res.status(500).json({ error: "Internal server error: " + e });
+    }
+}
 
 const changePassword = async (req, res) => {
     try {
@@ -139,4 +158,4 @@ const changePassword = async (req, res) => {
 }
 
 
-module.exports = { register, login, sendOtp, validateOtp, changePassword };
+module.exports = { register, login, sendOtp, validateOtp, changePassword,isAvailable };
