@@ -5,7 +5,7 @@ const Otp = require('../model/otp')
 
 const register = async (req, res) => {
     try {
-        const { name, email, password, username, phonenumber, role, specialization, pastexperiences } = req.body;
+        const { name, email, password, username, phonenumber, role, specialization, pastexperiences , otp } = req.body;
 
         let existingUser = await User.findOne({ username });
 
