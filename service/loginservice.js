@@ -5,11 +5,7 @@ const Otp = require('../model/otp')
 
 const register = async (req, res) => {
     try {
-<<<<<<< HEAD
-        const { name, email, password, username, phonenumber, role, specialization, pastexperiences , otp } = req.body;
-=======
-        const { name, email, username, password} = req.body;
->>>>>>> e58355ced07f96908d715a6412f40c11a4e52b7d
+        const { name, email, username, password } = req.body;
 
         let existingUser = await User.findOne({ username });
 
@@ -25,14 +21,14 @@ const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
 
-        const newUser = new User({ name, email, password: hashedPassword, username});
+        const newUser = new User({ name, email, password: hashedPassword, username });
 
         await newUser.save();
 
-        res.status(201).json({ newUser });
+        return res.status(201).json({ newUser });
 
     } catch (e) {
-        res.status(500).json({ error: "Internal server error: " + e });
+        return res.status(500).json({ error: "Internal server error: " + e });
     }
 }
 
@@ -52,10 +48,10 @@ const login = async (req, res) => {
             return res.status(401).json({ error: "Incorrect password" });
         }
 
-        res.status(200).json({ user });
+        return res.status(200).json({ user });
 
     } catch (e) {
-        res.status(500).json({ error: "Internal server error: " + e });
+        return res.status(500).json({ error: "Internal server error: " + e });
     }
 }
 
@@ -93,10 +89,10 @@ const sendOtp = async (req, res) => {
         // Send the email
         await transporter.sendMail(mailOptions);
         console.log('OTP sent successfully.');
-        res.status(200).json({ message: 'OTP sent successfully.' });
+        return res.status(200).json({ message: 'OTP sent successfully.' });
     } catch (error) {
         console.error('Error sending OTP:', error);
-        res.status(500).json({ error: 'Failed to send OTP. Please try again later.' });
+        return res.status(500).json({ error: 'Failed to send OTP. Please try again later.' });
     }
 };
 
@@ -112,12 +108,35 @@ const validateOtp = async (req, res) => {
             return res.status(401).json({ error: "Incorrect OTP" });
         }
 
-        res.status(200).json({ message: "Verified" });
+        return res.status(200).json({ message: "Verified" });
     } catch (error) {
         console.error('Error validating OTP:', error);
-        res.status(500).json({ error: 'Failed to validate OTP. Please try again later.' });
+        return res.status(500).json({ error: 'Failed to validate OTP. Please try again later.' });
     }
 };
 
+const changePassword = async (req, res) => {
+    try {
+        const user = await User.findOne({ email: req.body.email });
 
-module.exports = { register, login, sendOtp, validateOtp };
+        if (!user) {
+            return res.status(401).json({ error: "Account does not exist" });
+        }
+
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+        user.password = hashedPassword;
+
+        await user.save();
+
+        return res.status(200).json({ message: 'Password changed successfully.' });
+
+
+    } catch (e) {
+        console.error('Error validating OTP:', error);
+        return res.status(500).json({ error: 'Failed to change password. Please try again later.' });
+    }
+}
+
+
+module.exports = { register, login, sendOtp, validateOtp, changePassword };
